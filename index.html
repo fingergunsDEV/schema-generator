@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Schema Markup Generator (JSON-LD)</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .schema-section { transition: all 0.3s ease; }
+        .btn-loading { position: relative; color: transparent !important; }
+        .btn-loading::after {
+            content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 1.5rem; height: 1.5rem; border: 2px solid #fff; border-top-color: transparent;
+            border-radius: 50%; animation: spin 0.6s linear infinite;
+        }
+        @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+        .collapsible-header { cursor: pointer; }
+        .collapsible-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+        .error { border-color: #ef4444; }
+        .error-message { color: #ef4444; font-size: 0.875rem; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="max-w-4xl mx-auto p-6 mt-5">
+        <img src="https://cdn.prod.website-files.com/65db95957d65c02ae759f762/66fca6720ecaf4e682af0a99_blue%20logo%20new.avif" class="w-32 mx-auto mb-6" alt="Logo">
+        <div class="bg-white rounded-lg shadow-lg p-8">
+            <div class="bg-gradient-to-r from-blue-600 to-teal-500 text-white py-8 px-6 rounded-t-lg text-center">
+                <h3 class="text-3xl font-semibold"><i class="material-icons align-middle">code</i> Comprehensive Schema Markup Generator (JSON-LD)</h3>
+            </div>
+            <div class="p-6">
+                <div class="mb-6">
+                    <label for="schema-type" class="block text-sm font-medium text-gray-700"><i class="material-icons align-middle">category</i> Schema Type</label>
+                    <select id="schema-type" class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="showSchemaFields()">
+                        <option value="Article">Article</option>
+                        <option value="FAQPage">FAQ Page</option>
+                        <option value="BlogPosting">Blog Post</option>
+                        <option value="WebPage">Web Page</option>
+                        <option value="LocalBusiness">Local Business</option>
+                        <option value="Organization">Organization</option>
+                        <option value="Product">Product</option>
+                        <option value="Service">Service</option>
+                        <option value="Event">Event</option>
+                        <option value="JobPosting">Job Posting</option>
+                        <option value="Recipe">Recipe</option>
+                        <option value="Review">Review</option>
+                        <option value="Person">Person</option>
+                    </select>
+                </div>
+
+                <div id="schema-fields">
+                    <div id="Article" class="schema-section">
+                        <h5 class="collapsible-header text-lg font-medium mb-2 flex items-center"><i class="material-icons align-middle">description</i> Article <i class="material-icons ml-auto">expand_more</i></h5>
+                        <div class="collapsible-content">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div><label class="block text-sm font-medium text-gray-700">URL</label><input type="url" id="article-url" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Headline</label><input type="text" id="headline" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Image URL</label><input type="url" id="image-url" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Description</label><textarea id="description" class="mt-1 block w-full p-2 border rounded-md" rows="2" required></textarea></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Author</label><input type="text" id="author" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Publisher</label><input type="text" id="publisher" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Publisher Logo URL</label><input type="url" id="publisher-logo-url" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="FAQPage" class="schema-section hidden">
+                        <h5 class="text-lg font-medium mb-2"><i class="material-icons align-middle">help</i> FAQ Page</h5>
+                        <div id="faq-items"></div>
+                        <button id="addQuestionBtn" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"><i class="material-icons align-middle">add</i> Add Question</button>
+                    </div>
+
+                    <div id="BlogPosting" class="schema-section hidden">
+                        <h5 class="collapsible-header text-lg font-medium mb-2 flex items-center"><i class="material-icons align-middle">rss_feed</i> Blog Post <i class="material-icons ml-auto">expand_more</i></h5>
+                        <div class="collapsible-content">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div><label class="block text-sm font-medium text-gray-700">URL</label><input type="url" id="blog-url" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Headline</label><input type="text" id="blog-headline" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Author</label><input type="text" id="blog-author" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Date Published</label><input type="date" id="date-published" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="WebPage" class="schema-section hidden">
+                        <h5 class="collapsible-header text-lg font-medium mb-2 flex items-center"><i class="material-icons align-middle">web</i> Web Page <i class="material-icons ml-auto">expand_more</i></h5>
+                        <div class="collapsible-content">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div><label class="block text-sm font-medium text-gray-700">URL</label><input type="url" id="webpage-url" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Headline</label><input type="text" id="webpage-headline" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Breadcrumb</label><input type="text" id="breadcrumb" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="LocalBusiness" class="schema-section hidden">
+                        <h5 class="collapsible-header text-lg font-medium mb-2 flex items-center"><i class="material-icons align-middle">store</i> Local Business <i class="material-icons ml-auto">expand_more</i></h5>
+                        <div class="collapsible-content">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div><label class="block text-sm font-medium text-gray-700">Business Name</label><input type="text" id="business-name" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Address</label><input type="text" id="business-address" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Phone Number</label><input type="tel" id="business-phone" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Website</label><input type="url" id="business-website" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="Organization" class="schema-section hidden">
+                        <h5 class="collapsible-header text-lg font-medium mb-2 flex items-center"><i class="material-icons align-middle">business_center</i> Organization <i class="material-icons ml-auto">expand_more</i></h5>
+                        <div class="collapsible-content">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div><label class="block text-sm font-medium text-gray-700">Organization Name</label><input type="text" id="org-name" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Logo URL</label><input type="url" id="org-logo" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Contact Email</label><input type="email" id="org-email" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="Product" class="schema-section hidden">
+                        <h5 class="collapsible-header text-lg font-medium mb-2 flex items-center"><i class="material-icons align-middle">shopping_cart</i> Product <i class="material-icons ml-auto">expand_more</i></h5>
+                        <div class="collapsible-content">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div><label class="block text-sm font-medium text-gray-700">Name</label><input type="text" id="product-name" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Image URL</label><input type="url" id="product-image" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Description</label><textarea id="product-description" class="mt-1 block w-full p-2 border rounded-md" rows="2" required></textarea></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Brand</label><input type="text" id="product-brand" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Price</label><input type="number" step="0.01" id="product-price" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Currency</label><input type="text" id="product-currency" class="mt-1 block w-full p-2 border rounded-md" placeholder="e.g., USD" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Availability</label><select id="product-availability" class="mt-1 block w-full p-2 border rounded-md" required><option value="InStock">In Stock</option><option value="OutOfStock">Out of Stock</option></select></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="Service" class="schema-section hidden">
+                        <h5 class="collapsible-header text-lg font-medium mb-2 flex items-center"><i class="material-icons align-middle">build</i> Service <i class="material-icons ml-auto">expand_more</i></h5>
+                        <div class="collapsible-content">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div><label class="block text-sm font-medium text-gray-700">Name</label><input type="text" id="service-name" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Service Type</label><input type="text" id="service-type" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Description</label><textarea id="service-description" class="mt-1 block w-full p-2 border rounded-md" rows="2" required></textarea></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Provider Name</label><input type="text" id="service-provider" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="Event" class="schema-section hidden">
+                        <h5 class="collapsible-header text-lg font-medium mb-2 flex items-center"><i class="material-icons align-middle">event</i> Event <i class="material-icons ml-auto">expand_more</i></h5>
+                        <div class="collapsible-content">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div><label class="block text-sm font-medium text-gray-700">Name</label><input type="text" id="event-name" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Start Date</label><input type="datetime-local" id="event-start" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">End Date</label><input type="datetime-local" id="event-end" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Location Name</label><input type="text" id="event-location-name" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Location Address</label><input type="text" id="event-location-address" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="JobPosting" class="schema-section hidden">
+                        <h5 class="collapsible-header text-lg font-medium mb-2 flex items-center"><i class="material-icons align-middle">work</i> Job Posting <i class="material-icons ml-auto">expand_more</i></h5>
+                        <div class="collapsible-content">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div><label class="block text-sm font-medium text-gray-700">Title</label><input type="text" id="job-title" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Employer</label><input type="text" id="job-employer" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Date Posted</label><input type="date" id="job-date" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Salary</label><input type="number" step="0.01" id="job-salary" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Currency</label><input type="text" id="job-currency" class="mt-1 block w-full p-2 border rounded-md" placeholder="e.g., USD" required></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="Recipe" class="schema-section hidden">
+                        <h5 class="collapsible-header text-lg font-medium mb-2 flex items-center"><i class="material-icons align-middle">restaurant</i> Recipe <i class="material-icons ml-auto">expand_more</i></h5>
+                        <div class="collapsible-content">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div><label class="block text-sm font-medium text-gray-700">Name</label><input type="text" id="recipe-name" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Image URL</label><input type="url" id="recipe-image" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Prep Time (minutes)</label><input type="number" id="recipe-prep" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Cook Time (minutes)</label><input type="number" id="recipe-cook" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Ingredients (comma-separated)</label><textarea id="recipe-ingredients" class="mt-1 block w-full p-2 border rounded-md" rows="2" required></textarea></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="Review" class="schema-section hidden">
+                        <h5 class="collapsible-header text-lg font-medium mb-2 flex items-center"><i class="material-icons align-middle">star</i> Review <i class="material-icons ml-auto">expand_more</i></h5>
+                        <div class="collapsible-content">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div><label class="block text-sm font-medium text-gray-700">Item Reviewed</label><input type="text" id="review-item" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Rating (1-5)</label><input type="number" min="1" max="5" id="review-rating" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Author</label><input type="text" id="review-author" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Review Body</label><textarea id="review-body" class="mt-1 block w-full p-2 border rounded-md" rows="2" required></textarea></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="Person" class="schema-section hidden">
+                        <h5 class="collapsible-header text-lg font-medium mb-2 flex items-center"><i class="material-icons align-middle">person</i> Person <i class="material-icons ml-auto">expand_more</i></h5>
+                        <div class="collapsible-content">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div><label class="block text-sm font-medium text-gray-700">Name</label><input type="text" id="person-name" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Job Title</label><input type="text" id="person-job" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Email</label><input type="email" id="person-email" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                                <div><label class="block text-sm font-medium text-gray-700">Telephone</label><input type="tel" id="person-phone" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="bg-blue-600 text-white px-6 py-3 rounded-md shadow-md hover:bg-blue-700 mt-6" onclick="generateSchema()"><i class="material-icons align-middle">build</i> Generate Schema</button>
+                </div>
+
+                <div id="schema-output" class="mt-6 opacity-0 max-h-0 overflow-hidden transition-all duration-300">
+                    <div class="flex space-x-4">
+                        <button class="copy-button bg-teal-500 text-white px-4 py-2 rounded-md hover:bg-teal-600" onclick="copyToClipboard()"><i class="material-icons align-middle">content_copy</i> Copy</button>
+                        <button class="download-button bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600" onclick="downloadSchema()"><i class="material-icons align-middle">download</i> Download</button>
+                    </div>
+                    <h5 class="text-lg font-medium mt-4"><i class="material-icons align-middle">code</i> JSON-LD Markup</h5>
+                    <pre id="jsonld-output" class="bg-gray-50 p-4 rounded-md border overflow-auto max-h-96 font-mono text-sm"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showSchemaFields() {
+            const schemaType = document.getElementById("schema-type").value;
+            document.querySelectorAll(".schema-section").forEach(section => section.classList.add("hidden"));
+            document.getElementById(schemaType).classList.remove("hidden");
+        }
+
+        document.getElementById('addQuestionBtn').addEventListener('click', addQuestion);
+
+        function addQuestion() {
+            const faqItems = document.getElementById('faq-items');
+            const count = faqItems.querySelectorAll('.faq-item').length + 1;
+            const faqItem = document.createElement('div');
+            faqItem.classList.add('faq-item', 'mb-4', 'opacity-0');
+            faqItem.innerHTML = `
+                <div class="grid grid-cols-1 gap-2">
+                    <div><label class="block text-sm font-medium text-gray-700">Question #${count}</label><input type="text" id="faq-question-${count}" class="mt-1 block w-full p-2 border rounded-md" required></div>
+                    <div><label class="block text-sm font-medium text-gray-700">Answer #${count}</label><textarea id="faq-answer-${count}" class="mt-1 block w-full p-2 border rounded-md" rows="2" required></textarea></div>
+                    <button class="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 delete-btn"><i class="material-icons align-middle">delete</i> Delete</button>
+                </div>`;
+            faqItems.appendChild(faqItem);
+            setTimeout(() => faqItem.classList.replace("opacity-0", "opacity-100"), 10);
+            faqItem.querySelector('.delete-btn').addEventListener('click', () => {
+                faqItem.classList.replace("opacity-100", "opacity-0");
+                setTimeout(() => faqItem.remove(), 300);
+            });
+        }
+
+        function validateFields(schemaType) {
+            const fields = document.querySelectorAll(`#${schemaType} .mt-1[required]`);
+            let valid = true;
+            fields.forEach(field => {
+                field.classList.remove('error');
+                const errorMsg = field.nextElementSibling?.classList.contains('error-message') ? field.nextElementSibling : null;
+                if (errorMsg) errorMsg.remove();
+                if (!field.value) {
+                    valid = false;
+                    field.classList.add('error');
+                    field.insertAdjacentHTML('afterend', `<span class="error-message">This field is required</span>`);
+                }
+            });
+            return valid;
+        }
+
+        function generateSchema() {
+            const button = document.querySelector('button[onclick="generateSchema()"]');
+            button.classList.add('btn-loading');
+            button.disabled = true;
+
+            setTimeout(() => {
+                const schemaType = document.getElementById("schema-type").value;
+                if (!validateFields(schemaType)) {
+                    alert("Please fill in all required fields.");
+                    button.classList.remove('btn-loading');
+                    button.disabled = false;
+                    return;
+                }
+
+                let jsonld = { "@context": "https://schema.org" };
+                switch (schemaType) {
+                    case "Article":
+                        jsonld["@type"] = "Article";
+                        jsonld["mainEntityOfPage"] = { "@type": "WebPage", "@id": document.getElementById("article-url").value };
+                        jsonld["headline"] = document.getElementById("headline").value;
+                        jsonld["image"] = [document.getElementById("image-url").value];
+                        jsonld["description"] = document.getElementById("description").value;
+                        jsonld["author"] = { "@type": "Person", "name": document.getElementById("author").value };
+                        jsonld["publisher"] = {
+                            "@type": "Organization",
+                            "name": document.getElementById("publisher").value,
+                            "logo": { "@type": "ImageObject", "url": document.getElementById("publisher-logo-url").value }
+                        };
+                        break;
+                    case "FAQPage":
+                        jsonld["@type"] = "FAQPage";
+                        jsonld["mainEntity"] = Array.from(document.querySelectorAll('#faq-items .faq-item')).map((item, i) => ({
+                            "@type": "Question",
+                            "name": item.querySelector(`#faq-question-${i + 1}`).value,
+                            "acceptedAnswer": { "@type": "Answer", "text": item.querySelector(`#faq-answer-${i + 1}`).value }
+                        }));
+                        break;
+                    case "BlogPosting":
+                        jsonld["@type"] = "BlogPosting";
+                        jsonld["mainEntityOfPage"] = { "@type": "WebPage", "@id": document.getElementById("blog-url").value };
+                        jsonld["headline"] = document.getElementById("blog-headline").value;
+                        jsonld["author"] = { "@type": "Person", "name": document.getElementById("blog-author").value };
+                        jsonld["datePublished"] = document.getElementById("date-published").value;
+                        break;
+                    case "WebPage":
+                        jsonld["@type"] = "WebPage";
+                        jsonld["url"] = document.getElementById("webpage-url").value;
+                        jsonld["name"] = document.getElementById("webpage-headline").value;
+                        jsonld["breadcrumb"] = { "@type": "BreadcrumbList", "itemListElement": document.getElementById("breadcrumb").value.split(' > ').map((item, index) => ({
+                            "@type": "ListItem",
+                            "position": index + 1,
+                            "name": item.trim()
+                        })) };
+                        break;
+                    case "LocalBusiness":
+                        jsonld["@type"] = "LocalBusiness";
+                        jsonld["name"] = document.getElementById("business-name").value;
+                        jsonld["address"] = { "@type": "PostalAddress", "streetAddress": document.getElementById("business-address").value };
+                        jsonld["telephone"] = document.getElementById("business-phone").value;
+                        jsonld["url"] = document.getElementById("business-website").value;
+                        break;
+                    case "Organization":
+                        jsonld["@type"] = "Organization";
+                        jsonld["name"] = document.getElementById("org-name").value;
+                        jsonld["logo"] = { "@type": "ImageObject", "url": document.getElementById("org-logo").value };
+                        jsonld["email"] = document.getElementById("org-email").value;
+                        break;
+                    case "Product":
+                        jsonld["@type"] = "Product";
+                        jsonld["name"] = document.getElementById("product-name").value;
+                        jsonld["image"] = [document.getElementById("product-image").value];
+                        jsonld["description"] = document.getElementById("product-description").value;
+                        jsonld["brand"] = { "@type": "Brand", "name": document.getElementById("product-brand").value };
+                        jsonld["offers"] = {
+                            "@type": "Offer",
+                            "price": document.getElementById("product-price").value,
+                            "priceCurrency": document.getElementById("product-currency").value,
+                            "availability": `https://schema.org/${document.getElementById("product-availability").value}`
+                        };
+                        break;
+                    case "Service":
+                        jsonld["@type"] = "Service";
+                        jsonld["name"] = document.getElementById("service-name").value;
+                        jsonld["serviceType"] = document.getElementById("service-type").value;
+                        jsonld["description"] = document.getElementById("service-description").value;
+                        jsonld["provider"] = { "@type": "Organization", "name": document.getElementById("service-provider").value };
+                        break;
+                    case "Event":
+                        jsonld["@type"] = "Event";
+                        jsonld["name"] = document.getElementById("event-name").value;
+                        jsonld["startDate"] = document.getElementById("event-start").value;
+                        jsonld["endDate"] = document.getElementById("event-end").value;
+                        jsonld["location"] = {
+                            "@type": "Place",
+                            "name": document.getElementById("event-location-name").value,
+                            "address": { "@type": "PostalAddress", "streetAddress": document.getElementById("event-location-address").value }
+                        };
+                        break;
+                    case "JobPosting":
+                        jsonld["@type"] = "JobPosting";
+                        jsonld["title"] = document.getElementById("job-title").value;
+                        jsonld["hiringOrganization"] = { "@type": "Organization", "name": document.getElementById("job-employer").value };
+                        jsonld["datePosted"] = document.getElementById("job-date").value;
+                        jsonld["baseSalary"] = {
+                            "@type": "MonetaryAmount",
+                            "currency": document.getElementById("job-currency").value,
+                            "value": document.getElementById("job-salary").value
+                        };
+                        break;
+                    case "Recipe":
+                        jsonld["@type"] = "Recipe";
+                        jsonld["name"] = document.getElementById("recipe-name").value;
+                        jsonld["image"] = [document.getElementById("recipe-image").value];
+                        jsonld["prepTime"] = `PT${document.getElementById("recipe-prep").value}M`;
+                        jsonld["cookTime"] = `PT${document.getElementById("recipe-cook").value}M`;
+                        jsonld["recipeIngredient"] = document.getElementById("recipe-ingredients").value.split(',').map(i => i.trim());
+                        break;
+                    case "Review":
+                        jsonld["@type"] = "Review";
+                        jsonld["itemReviewed"] = { "@type": "Thing", "name": document.getElementById("review-item").value };
+                        jsonld["reviewRating"] = { "@type": "Rating", "ratingValue": document.getElementById("review-rating").value };
+                        jsonld["author"] = { "@type": "Person", "name": document.getElementById("review-author").value };
+                        jsonld["reviewBody"] = document.getElementById("review-body").value;
+                        break;
+                    case "Person":
+                        jsonld["@type"] = "Person";
+                        jsonld["name"] = document.getElementById("person-name").value;
+                        jsonld["jobTitle"] = document.getElementById("person-job").value;
+                        jsonld["email"] = document.getElementById("person-email").value;
+                        jsonld["telephone"] = document.getElementById("person-phone").value;
+                        break;
+                }
+
+                const output = document.getElementById("schema-output");
+                output.classList.add("opacity-100", "max-h-[1000px]");
+                document.getElementById("jsonld-output").textContent = JSON.stringify(jsonld, null, 2);
+                button.classList.remove('btn-loading');
+                button.disabled = false;
+            }, 500);
+        }
+
+        function copyToClipboard() {
+            const output = document.getElementById("jsonld-output").textContent;
+            navigator.clipboard.writeText(output).then(() => {
+                const button = document.querySelector('.copy-button');
+                button.innerHTML = '<i class="material-icons align-middle">check</i> Copied!';
+                setTimeout(() => button.innerHTML = '<i class="material-icons align-middle">content_copy</i> Copy', 2000);
+            });
+        }
+
+        function downloadSchema() {
+            const output = document.getElementById("jsonld-output").textContent;
+            const blob = new Blob([output], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${document.getElementById("schema-type").value.toLowerCase()}-schema.jsonld`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        document.querySelectorAll('.collapsible-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const content = header.nextElementSibling;
+                const icon = header.querySelector('i:last-child');
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                    icon.textContent = 'expand_more';
+                } else {
+                    content.style.maxHeight = content.scrollHeight + 'px';
+                    icon.textContent = 'expand_less';
+                }
+            });
+        });
+
+        window.onload = showSchemaFields;
+    </script>
+</body>
+</html>
